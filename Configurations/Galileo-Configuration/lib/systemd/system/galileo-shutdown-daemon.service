@@ -1,0 +1,9 @@
+[Unit]
+Description=Galileo Poweroff Daemon
+
+[Service]
+Type=simple
+ExecStart=/bin/sh  /opt/cln/galileo/galileo_shutdown_daemon.sh
+
+[Install]
+WantedBy=multi-user.target
