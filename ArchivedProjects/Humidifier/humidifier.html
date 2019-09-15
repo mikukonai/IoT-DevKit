@@ -1,0 +1,43 @@
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>Miku智能加湿器</title>
+<style>
+.title {display:block;font-size:60px;margin-top:40px;margin-bottom:40px;margin-left: 0px;margin-right: 0px;font-weight: 300;color:rgba(255,255,255,0.9);}
+.temp {background:rgba(255,255,255,0);font-size:270px;color:white;font-weight:100;margin-bottom:70px;}
+body {background-color:#ffffff;background:url("./img/night.jpg") no-repeat;background-size:cover;background-position: right;margin: 0;font-family:Microsoft YaHei,Arial,Helvetica,sans-serif;color:rgba(255,255,255,0.7);font-size:30px;text-align:center;}
+.btn{-webkit-appearance:button;display:block;width:50%;height:120px;background:rgba(255,255,255,0.2);color:#ffffff;border: 0px solid #ffffff;line-height:70px;text-align:center;font-weight:200;font-size:60px;text-decoration:none;}
+.top-panel{position:fixed;height:150px;line-height:150px;font-size:70px;font-weight:300;color:rgba(255,255,255,0.7);width:100%;text-align:center;background:#ffffff;filter:alpha(opacity=50);-moz-opacity:0.5;-khtml-opacity:0.5;opacity:0.5;}
+.top-panel-text{position:fixed;height:150px;line-height:150px;font-size:70px;font-weight:300;color:#ffffff;width:100%;text-align:center;}
+</style>
+</head>
+<body>
+<iframe id="hf" style="display:none"></iframe>
+<div class="top-panel"></div>
+<div class="top-panel-text">Miku智能加湿器</div>
+<div class="top-panel-text"><a href="javascript:void(0);" onclick="window.location.go(-1);" style="font-size:50px;color:#66ccff;text-decoration:none;text-align:left; float:left;">〈 返回</a><a href="http://192.168.31.123/iotgw.html" style="font-size:50px;color:#66ccff;text-decoration:none;text-align:right;float:right;">网关控制台 〉</a></div>
+<div style="display:block;height:200px;"></div>
+<div class="title">
+待机中
+</div>
+<div class="temp">21<span style="font-size:100px;">%</span></div>
+
+<div style="margin-top:60px;margin-bottom:120px;">
+<table align="center" style="font-size:60px;color:white;">
+<tr><td style="text-align:right;">气温</td><td> ：</td><td>20.5°C
+</td></tr>
+<tr><td style="text-align:right;">气压</td><td> ：</td><td>1013.0hPa
+</td></tr></table>
+</div>
+
+
+<button class="btn" style="float:left;" onclick="document.getElementById('hf').src = './on'">启动</button>
+<button class="btn" style="float:right;border-left:1px solid rgba(255,255,255,0.5);" onclick="document.getElementById('hf').src = './off'">关闭</button>
+<div style="display:block;height:170px;"></div>
+<div style="font-weight:300;margin-top:60px;margin-bottom:10px;">
+主控基于 ESP8266 | 加湿器本体 小熊JSQ-A30Y1
+</div>
+<div style="font-weight:300;margin-top:0px;margin-bottom:10px;">
+&copy; 2017.12 Mikukonai
+</div>
+</br></body></html>
