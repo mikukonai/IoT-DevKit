@@ -5,6 +5,8 @@
  *
  * Mikukonai 2017.12
  *
+ * 2020-02-19 修正了湿度显示错误的问题；强化UI显示效果
+ *
  */
 #include <string.h>
 #include <ESP8266WiFi.h>
@@ -76,7 +78,7 @@ static char html[5000];
 static char tmp[250];
 
 static const char html1[] = "\
-<html><head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"/><title>Miku智能加湿器</title><style>.title {display:block;font-size:60px;margin-top:40px;margin-bottom:40px;margin-left: 0px;margin-right: 0px;font-weight: 300;color:rgba(255,255,255,0.9);}.temp {background:rgba(255,255,255,0);font-size:270px;color:white;font-weight:100;margin-bottom:70px;}body {background-color:#000000;background:url(\"http://upload-images.jianshu.io/upload_images/2840222-7d2312d82d6d1b46.jpg\") no-repeat;background-size:cover;background-position: right;margin: 0;font-family:Microsoft YaHei,Arial,Helvetica,sans-serif;color:rgba(255,255,255,0.9);font-size:30px;text-align:center;}.btn{-webkit-appearance:button;display:block;width:50%;height:120px;background:rgba(255,255,255,0.2);color:#ffffff;border: 0px solid #ffffff;line-height:70px;text-align:center;font-weight:200;font-size:60px;text-decoration:none;}.top-panel{position:fixed;height:150px;line-height:150px;font-size:70px;font-weight:300;color:rgba(255,255,255,0.7);width:100%;text-align:center;background:#ffffff;filter:alpha(opacity=50);-moz-opacity:0.5;-khtml-opacity:0.5;opacity:0.5;}.top-panel-text{position:fixed;height:150px;line-height:150px;font-size:50px;font-weight:300;color:#ffffff;width:100%;text-align:center;}</style>\
+<html><head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"/><title>Miku智能加湿器</title><style>.title {display:block;font-size:60px;margin-top:40px;margin-bottom:40px;margin-left: 0px;margin-right: 0px;font-weight: 300;color:#0066ff;}.temp {background:rgba(255,255,255,0);font-size:270px;color:#000;font-weight:100;margin-bottom:70px;}body {background-color:rgb(230, 236, 240);background-size:cover;background-position: right;margin: 0;font-family:Microsoft YaHei,Arial,Helvetica,sans-serif;color:#000;font-size:30px;text-align:center;}.btn{-webkit-appearance:button;display:block;width:50%;height:120px;background:rgba(255,255,255,0.2);color:#0066ff;border: 0px solid #ffffff;line-height:70px;text-align:center;font-weight:200;font-size:60px;text-decoration:none;}.top-panel{position:fixed;height:150px;line-height:150px;font-size:70px;font-weight:300;color:rgba(255,255,255,0.7);width:100%;text-align:center;background:#ffffff;filter:alpha(opacity=50);-moz-opacity:0.5;-khtml-opacity:0.5;opacity:0.5;}.top-panel-text{position:fixed;height:150px;line-height:150px;font-size:50px;color:#000;width:100%;text-align:center;}</style>\
 <script language=\"JavaScript\">function switch_status(s){var ttl=document.getElementById(\"status\");if(s==1){ttl.innerHTML=\"正在运行\";}else{ttl.innerHTML=\"待机中\";}}</script></head>\
 <body><iframe id=\"hf\" style=\"display:none\"></iframe><div class=\"top-panel\"></div><div class=\"top-panel-text\">Miku智能加湿器</div>\
 <div class=\"top-panel-text\"><a href=\"javascript:void(0);\" onclick=\"window.location.go(-1);\" style=\"font-size:50px;color:#0066ff;text-decoration:none;text-align:left; float:left;\">〈 返回</a><a href=\"http://192.168.31.123/iotgw.html\" style=\"font-size:50px;color:#0066ff;text-decoration:none;text-align:right;float:right;\">控制台 〉</a></div>\
@@ -87,7 +89,7 @@ static const char html2[] = "\
 %d\
 ";
 static const char html3[] = "\
-<span style=\"font-size:100px;\">%</span></div><div style=\"margin-top:60px;margin-bottom:120px;\"><table align=\"center\" style=\"font-size:60px;color:white;\"><tr><td style=\"text-align:right;\">气温</td><td> : </td><td>\
+<span style=\"font-size:100px;\">%</span></div><div style=\"margin-top:60px;margin-bottom:120px;\"><table align=\"center\" style=\"font-size:60px;color:#000;\"><tr><td style=\"text-align:right;\">气温</td><td> : </td><td>\
 ";
 static const char html4[] = "\
 °C</td></tr><tr><td style=\"text-align:right;\">气压</td><td> : </td><td>\
@@ -124,6 +126,7 @@ void BMP280_setup() {
     sensor.settings.filter = 0;
     sensor.settings.tempOverSample = 1;
     sensor.settings.pressOverSample = 1;
+    sensor.settings.humidOverSample = 1;
     sensor.begin();
 }
 
