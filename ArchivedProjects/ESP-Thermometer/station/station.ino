@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
+#include <WiFiClientSecure.h>
 #include "SparkFunBME280.h"
 #include <stdint.h>
 #include "Wire.h"
@@ -12,6 +13,9 @@
 const char* ssid = "<SSID>";
 const char* password = "<PW>";
 const int port = 80;
+
+// LCD(1602)
+LiquidCrystal_I2C lcd(0x3f,16,2);
 
 // 12小时制？
 bool is12h = false;
@@ -51,6 +55,13 @@ static char tmp[250];
 static char html[5000];
 static const char header[] = "<html><head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"/></head>";
 
+String IpAddress2String(const IPAddress& ipAddress)
+{
+    return String(ipAddress[0]) + String(".") +\
+    String(ipAddress[1]) + String(".") +\
+    String(ipAddress[2]) + String(".") +\
+    String(ipAddress[3])  ; 
+}
 
 int readBH1750() {
     Wire.beginTransmission(ADDRESS_BH1750FVI); //"notify" the matching device
@@ -85,6 +96,13 @@ void setDS3231(int YEAR, int MONTH, int DAY, int HOUR, int MINUTE, int SECOND) {
     Clock.setDate(DAY);  //Set the date of the month
     Clock.setMonth(MONTH);  //Set the month of the year
     Clock.setYear(YEAR);  //Set the year (Last two digits of the year)
+}
+
+
+void readBME280() {
+    humidity = (int)sensor.readFloatHumidity();
+    temperature = sensor.readTempC();
+    pressure = sensor.readFloatPressure() / 100.0f;
 }
 
 
@@ -124,6 +142,12 @@ void blink(int time) {
 
 void setup() {
     Wire.begin(0, 2);
+
+    // LCD1602初始化
+    lcd.init();
+    lcd.backlight();
+    lcd.clear();
+
     BMP280_setup();
     pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
     Serial.begin(115200);
@@ -131,6 +155,7 @@ void setup() {
     // 网络初始化与连接
     WiFi.begin(ssid, password);
     Serial.print("Connecting");
+    lcd.printstr("Connecting...");
     while (WiFi.status() != WL_CONNECTED) {
         blink(50);
         delay(80);
@@ -142,15 +167,16 @@ void setup() {
     Serial.println(ssid);
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+    lcd.setCursor(0, 1);
+    lcd.printstr(IpAddress2String(WiFi.localIP()).c_str());
 
     // 注册响应回调
     server.on("/",[]() {
         blink(10);
 
         // 读取BME280
-        humidity = (int)sensor.readFloatHumidity();
-        temperature = sensor.readTempC();
-        pressure = sensor.readFloatPressure() / 100.0f;
+        readBME280();
+
         // 读取BH1750
 //        illuminance = readBH1750();
         // 读取时间
@@ -210,6 +236,59 @@ void setup() {
 static int timeString[20];
 static int timeStringCount = 0;
 
+void LCD_Display() {
+    String datetime_str = "";
+    String humidity_str = "";
+    String temperature_str = "";
+    String pressure_str = "";
+
+    // 将温度、湿度、气压值转换成字符串
+    char strtemp[20];
+    sprintf(strtemp, "%d", humidity);
+    humidity_str = String(strtemp);
+    simple_float_to_str(strtemp, temperature);
+    temperature_str = String(strtemp);
+    simple_float_to_str(strtemp, pressure);
+    pressure_str = String(strtemp);
+
+    lcd.clear();
+    for (int c = 0; c < temperature_str.length(); c++){
+        lcd.write(temperature_str[c]);
+    }
+    lcd.write(0xdf);
+    lcd.write('C');
+    lcd.write(' ');
+    lcd.write(' ');
+    lcd.write(' ');
+    lcd.write(' ');
+    
+    for (int c = 0; c < humidity_str.length(); c++){
+        lcd.write(humidity_str[c]);
+    }
+    lcd.write('%');
+    lcd.write('R');
+    lcd.write('H');
+  
+    lcd.setCursor(0, 1);
+
+    // 气压：只精确到小数点后一位
+    for (int c = 0; c < 6; c++){
+        lcd.write(pressure_str[c]);
+    }
+    lcd.write('h');
+    lcd.write('P');
+    lcd.write('a');
+    lcd.write(' ');
+    lcd.write(' ');
+
+    // 时间：只显示分：秒，对应datetime_str的11-12，14-15
+    lcd.write(' ');
+    lcd.write(' ');
+    lcd.write(' ');
+    lcd.write(' ');
+    lcd.write(' ');
+}
+
 void loop() {
     // 2018.10.20 注释
     // 串口调试输入"yymmddHHMMSS回车"调整时间
@@ -241,5 +320,7 @@ void loop() {
      if (now - lastMsg > 1000) {
          lastMsg = now;
          blink(5);
+        readBME280();
+        LCD_Display();
      }
 }
